@@ -1,26 +1,159 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: 44 52% 97%;
+    /* warm cream */
+    --surface: 0 0% 100%;
+    --surface-2: 42 35% 95%;
+
+    --text: 222 47% 11%;
+    --muted: 215 16% 42%;
+
+    --primary: 151 55% 33%;
+    /* fresh green */
+    --primary-2: 151 50% 28%;
+    --accent: 18 85% 55%;
+    /* coral for deals */
+    --border: 220 14% 90%;
+    --ring: 151 55% 33%;
+  }
+
+  body {
+    background: hsl(var(--bg));
+    color: hsl(var(--text));
+  }
+
+  a {
+    text-decoration: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .container-app {
+    @apply mx-auto max-w-6xl px-4;
+  }
+
+  .card {
+    @apply rounded-3xl border bg-white shadow-sm;
+    border-color: hsl(var(--border));
+  }
+
+  .card-soft {
+    @apply rounded-3xl border shadow-sm;
+    border-color: hsl(var(--border));
+    background: hsl(var(--surface-2));
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium;
+    border-color: hsl(var(--border));
+    background: hsl(var(--surface-2));
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition;
+  }
+
+  .btn-primary {
+    background: hsl(var(--primary));
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: hsl(var(--primary-2));
+  }
+
+  .btn-ghost {
+    @apply border bg-white hover:bg-black/5;
+    border-color: hsl(var(--border));
+  }
+
+  .input {
+    @apply w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none transition;
+    border-color: hsl(var(--border));
+  }
+
+  .input:focus {
+    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.16);
+  }
+
+  .muted {
+    color: hsl(var(--muted));
+  }
+
+  .divider {
+    @apply h-px w-full;
+    background: hsl(var(--border));
+  }
+}
+
+@layer components {
+  .bg-aurora {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .bg-aurora::before,
+  .bg-aurora::after {
+    content: "";
+    position: absolute;
+    inset: -120px;
+    z-index: -1;
+    filter: blur(60px);
+    opacity: 0.65;
+    transform: translateZ(0);
+    animation: floaty 10s ease-in-out infinite;
+  }
+
+  .bg-aurora::before {
+    background: radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.35), transparent 55%),
+      radial-gradient(circle at 80% 20%, hsl(var(--accent) / 0.25), transparent 50%),
+      radial-gradient(circle at 70% 80%, hsl(var(--primary) / 0.18), transparent 55%);
+  }
+
+  .bg-aurora::after {
+    animation-duration: 14s;
+    opacity: 0.4;
+    background: radial-gradient(circle at 35% 70%, hsl(var(--accent) / 0.20), transparent 55%),
+      radial-gradient(circle at 85% 65%, hsl(var(--primary) / 0.22), transparent 55%);
+  }
+
+  @keyframes floaty {
+
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    50% {
+      transform: translate3d(20px, -18px, 0) scale(1.02);
+    }
+  }
+
+  .shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%);
+    background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.35) 45%, transparent 80%);
+    animation: shimmer 2.8s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+
+    0%,
+    60% {
+      transform: translateX(-120%);
+    }
+
+    100% {
+      transform: translateX(120%);
+    }
+  }
 }
