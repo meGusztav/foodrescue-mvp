@@ -1,10 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Ticket, Mail, Minus, Plus, Sparkles } from "lucide-react";
+import { Ticket, Minus, Plus, Sparkles, Lock } from "lucide-react";
 
 type Props = {
   dealId: string;
@@ -13,33 +13,71 @@ type Props = {
 
 export default function ReserveCard({ dealId, remaining }: Props) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
 
   const maxQty = useMemo(() => Math.max(1, Math.min(10, remaining)), [remaining]);
   const canReserve = remaining > 0 && !loading;
 
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadUser() {
+      const { data } = await supabase.auth.getUser();
+      if (!mounted) return;
+      setIsSignedIn(Boolean(data.user));
+    }
+
+    loadUser();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsSignedIn(Boolean(session?.user));
+    });
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
   function dec() {
     setQty((q) => Math.max(1, q - 1));
   }
+
   function inc() {
     setQty((q) => Math.min(maxQty, q + 1));
   }
 
   async function reserve() {
     setErr(null);
-    if (!dealId) return setErr("Invalid deal id.");
-    if (remaining <= 0) return setErr("Sold out.");
+
+    if (!dealId) {
+      setErr("Invalid deal id.");
+      return;
+    }
+
+    if (remaining <= 0) {
+      setErr("Sold out.");
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push(`/login?next=${encodeURIComponent(`/deals/${dealId}`)}`);
+      return;
+    }
 
     setLoading(true);
+
     try {
-      // Call the same RPC you already created (atomic)
-      const { data, error } = await supabase.rpc("reserve_deal", {
+      const { data, error } = await supabase.rpc("reserve_deal_authenticated", {
         p_deal_id: dealId,
         p_qty: qty,
-        p_user_email: email.trim() || null,
       });
 
       if (error) throw new Error(error.message);
@@ -67,28 +105,20 @@ export default function ReserveCard({ dealId, remaining }: Props) {
       </div>
 
       <div className="mt-3 text-sm muted">
-        Get a code instantly. Show it at pickup.
+        {isSignedIn
+          ? "Reserve now and your pickup code will appear instantly."
+          : "You need a customer account to reserve this deal."}
       </div>
 
       <div className="mt-5 grid gap-3">
-        <label className="text-sm font-semibold">Email (optional)</label>
-        <div className="relative">
-          <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 opacity-50" />
-          <input
-            className="input pl-11"
-            placeholder="you@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-
-        <label className="text-sm font-semibold mt-2">Quantity</label>
+        <label className="text-sm font-semibold">Quantity</label>
         <div className="flex items-center justify-between gap-3">
           <button
             className="btn btn-ghost h-11 w-11 p-0"
             onClick={dec}
             disabled={!canReserve || qty <= 1}
             aria-label="Decrease quantity"
+            type="button"
           >
             <Minus size={16} />
           </button>
@@ -103,6 +133,7 @@ export default function ReserveCard({ dealId, remaining }: Props) {
             onClick={inc}
             disabled={!canReserve || qty >= maxQty}
             aria-label="Increase quantity"
+            type="button"
           >
             <Plus size={16} />
           </button>
@@ -113,10 +144,29 @@ export default function ReserveCard({ dealId, remaining }: Props) {
           className="btn btn-primary mt-2 w-full shine"
           onClick={reserve}
           disabled={!canReserve}
+          type="button"
         >
-          {loading ? "Reserving…" : remaining > 0 ? "Reserve now" : "Sold out"}
-          <Sparkles size={16} />
+          {loading ? (
+            "Reserving…"
+          ) : isSignedIn ? (
+            "Reserve now"
+          ) : (
+            <>
+              Sign in to reserve <Lock size={16} />
+            </>
+          )}
+          {isSignedIn ? <Sparkles size={16} /> : null}
         </motion.button>
+
+        {!isSignedIn ? (
+          <button
+            type="button"
+            className="btn btn-ghost w-full"
+            onClick={() => router.push(`/register?next=${encodeURIComponent(`/deals/${dealId}`)}`)}
+          >
+            Create account
+          </button>
+        ) : null}
 
         <AnimatePresence>
           {err ? (
@@ -133,7 +183,7 @@ export default function ReserveCard({ dealId, remaining }: Props) {
         </AnimatePresence>
 
         <div className="mt-3 text-xs muted">
-          No payment yet — reserve code only (MVP).
+          No payment yet — reservation code only for now.
         </div>
       </div>
     </div>

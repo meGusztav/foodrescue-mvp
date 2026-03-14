@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Inter } from "next/font/google";
+import AuthNav from "@/components/AuthNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,7 +26,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={inter.className}>
-        <header className="sticky top-0 z-50 backdrop-blur bg-[hsl(var(--bg))]/80 border-b" style={{ borderColor: "hsl(var(--border))" }}>
+        <header
+          className="sticky top-0 z-50 backdrop-blur bg-[hsl(var(--bg))]/80 border-b"
+          style={{ borderColor: "hsl(var(--border))" }}
+        >
           <div className="container-app py-4 flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3">
               <div
@@ -43,13 +47,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             <nav className="hidden md:flex items-center gap-1">
               <NavLink href="/deals">Deals</NavLink>
+              <NavLink href="/orders">Orders</NavLink>
               <NavLink href="/stores/apply">For stores</NavLink>
               <NavLink href="/store">Store dashboard</NavLink>
               <NavLink href="/admin">Admin</NavLink>
             </nav>
 
-            <div className="md:hidden">
-              <Link className="btn btn-ghost" href="/deals">Browse</Link>
+            <div className="flex items-center gap-2">
+              <div className="md:hidden">
+                <Link className="btn btn-ghost" href="/deals">
+                  Browse
+                </Link>
+              </div>
+              <AuthNav />
             </div>
           </div>
         </header>

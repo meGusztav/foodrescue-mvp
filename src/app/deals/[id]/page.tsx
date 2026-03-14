@@ -53,7 +53,6 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
 
   return (
     <div className="space-y-6">
-      {/* Success banner */}
       {sp?.code ? (
         <div
           className="card p-5 md:p-6"
@@ -75,9 +74,7 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
-        {/* Left content */}
         <div className="lg:col-span-3 space-y-6">
-          {/* “Image” header (placeholder gradient panel; later swap to real image_url) */}
           <div className="card overflow-hidden">
             <div
               className="h-56 md:h-72"
@@ -120,6 +117,7 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
                 <span className="chip">Remaining: {Math.max(0, remaining)}</span>
                 <span className="chip">Reserve code</span>
                 <span className="chip">Pickup in-store</span>
+                <span className="chip">Login required</span>
               </div>
 
               <p className="mt-5 text-sm md:text-base muted leading-relaxed">
@@ -128,7 +126,6 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
             </div>
           </div>
 
-          {/* Details grid */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="card p-6">
               <div className="text-sm font-extrabold">Pickup window</div>
@@ -168,7 +165,6 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
             </div>
           </div>
 
-          {/* Trust/FAQ */}
           <div className="card p-6">
             <div className="text-sm font-extrabold">Quick FAQ</div>
             <div className="mt-4 grid gap-4 text-sm">
@@ -181,7 +177,8 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
               <div>
                 <div className="font-semibold">Do I need an account?</div>
                 <div className="muted mt-1">
-                  No — you can reserve with or without email. You’ll receive a code.
+                  Yes — customer login is required to reserve so your order and pickup code stay in
+                  your account.
                 </div>
               </div>
               <div>
@@ -194,11 +191,9 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
           </div>
         </div>
 
-        {/* Right sticky reserve */}
         <div className="lg:col-span-2">
           <ReserveCard dealId={d.id} remaining={remaining} />
 
-          {/* extra trust box */}
           <div className="card-soft p-6 mt-4">
             <div className="text-sm font-extrabold">Good to know</div>
             <div className="mt-2 text-sm muted">
