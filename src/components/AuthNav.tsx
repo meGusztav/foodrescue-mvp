@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { MapPin, ShoppingBag, User } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function AuthNav() {
@@ -37,28 +38,44 @@ export default function AuthNav() {
   }
 
   if (loading) {
-    return <div className="text-sm muted">...</div>;
+    return <div className="text-sm text-[#74877D]">...</div>;
   }
 
   if (!userEmail) {
     return (
-      <div className="flex items-center gap-2">
-        <Link href="/login" className="btn btn-ghost">
-          Login
-        </Link>
-        <Link href="/register" className="btn btn-primary">
-          Register
+      <div className="flex items-center gap-4">
+        <span className="hidden items-center text-[#74877D] md:inline-flex">
+          <MapPin size={15} />
+        </span>
+        <span className="hidden items-center text-[#74877D] md:inline-flex">
+          <ShoppingBag size={15} />
+        </span>
+
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#2F6F4E] px-4 py-2 text-[13px] font-bold text-white transition hover:bg-[#285E43]"
+        >
+          <User size={14} />
+          Sign In
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Link href="/orders" className="btn btn-ghost">
+    <div className="flex items-center gap-3">
+      <Link
+        href="/orders"
+        className="inline-flex rounded-xl border border-black/10 bg-white px-4 py-2 text-[13px] font-bold text-[#12212B]"
+      >
         Orders
       </Link>
-      <button className="btn btn-ghost" onClick={signOut} type="button">
+
+      <button
+        type="button"
+        onClick={signOut}
+        className="inline-flex rounded-xl border border-black/10 bg-white px-4 py-2 text-[13px] font-bold text-[#12212B]"
+      >
         Logout
       </button>
     </div>

@@ -37,7 +37,7 @@ export default async function DealsPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {deals.map((d) => {
           const remaining = d.quantity_remaining ?? (d.quantity_total - d.quantity_reserved);
           const off = pctOff(d.original_price ?? null, d.deal_price);
@@ -47,7 +47,9 @@ export default async function DealsPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="text-sm muted truncate">{d.store_name}</div>
-                  <div className="mt-1 text-lg font-extrabold tracking-tight truncate">{d.title}</div>
+                  <div className="mt-2 line-clamp-2 text-[16px] font-bold leading-snug text-[#12212B]">
+                    {d.title}
+                  </div>
                 </div>
 
                 <div className="text-right shrink-0">
