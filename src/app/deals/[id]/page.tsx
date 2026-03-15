@@ -23,8 +23,8 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
   if (!id || id === "undefined") {
     return (
       <div className="text-sm">
-        <div className="text-red-600 font-medium">Invalid deal URL.</div>
-        <div className="muted mt-2">Missing deal id.</div>
+        <div className="font-medium text-red-600">Invalid deal URL.</div>
+        <div className="mt-2 muted">Missing deal id.</div>
       </div>
     );
   }
@@ -38,8 +38,8 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
   if (error || !data) {
     return (
       <div className="text-sm">
-        <div className="text-red-600 font-medium">Deal not found.</div>
-        <div className="muted mt-2">
+        <div className="font-medium text-red-600">Deal not found.</div>
+        <div className="mt-2 muted">
           This usually means the deal is expired, inactive, or hidden by RLS.
         </div>
         {error ? <div className="mt-3 text-xs muted">Debug: {error.message}</div> : null}
@@ -48,7 +48,7 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
   }
 
   const d = data as Deal;
-  const remaining = d.quantity_remaining ?? (d.quantity_total - d.quantity_reserved);
+  const remaining = d.quantity_remaining ?? d.quantity_total - d.quantity_reserved;
   const off = pctOff(d.original_price ?? null, d.deal_price);
 
   return (
@@ -64,30 +64,39 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div className="text-sm font-extrabold">Reserved!</div>
-              <div className="text-sm muted mt-1">Show this code at pickup:</div>
+              <div className="mt-1 text-sm muted">Show this code at pickup:</div>
             </div>
-            <div className="text-2xl md:text-3xl font-extrabold tracking-[0.25em]">
-              {sp.code}
-            </div>
+            <div className="text-2xl font-extrabold tracking-[0.25em] md:text-3xl">{sp.code}</div>
           </div>
         </div>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
-        <div className="lg:col-span-3 space-y-6">
+        <div className="space-y-6 lg:col-span-3">
           <div className="card overflow-hidden">
-            <div
-              className="h-56 md:h-72"
-              style={{
-                background:
-                  "radial-gradient(circle at 30% 20%, hsl(var(--primary) / 0.25), transparent 55%), radial-gradient(circle at 80% 10%, hsl(var(--accent) / 0.20), transparent 55%), linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.95))",
-              }}
-            />
+            <div className="overflow-hidden">
+              {d.image_url ? (
+                <img
+                  src={d.image_url}
+                  alt={d.title}
+                  className="h-56 w-full object-cover md:h-72"
+                />
+              ) : (
+                <div
+                  className="h-56 md:h-72"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 30% 20%, hsl(var(--primary) / 0.25), transparent 55%), radial-gradient(circle at 80% 10%, hsl(var(--accent) / 0.20), transparent 55%), linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.95))",
+                  }}
+                />
+              )}
+            </div>
+
             <div className="p-6 md:p-7">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="text-sm muted">{d.store_name}</div>
-                  <h1 className="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight">
+                  <h1 className="mt-1 text-3xl font-extrabold tracking-tight md:text-4xl">
                     {d.title}
                   </h1>
                 </div>
@@ -95,7 +104,7 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
                 <div className="text-right">
                   <div className="text-2xl font-extrabold">{formatMoney(d.deal_price)}</div>
                   {d.original_price ? (
-                    <div className="text-sm muted line-through">{formatMoney(d.original_price)}</div>
+                    <div className="text-sm line-through muted">{formatMoney(d.original_price)}</div>
                   ) : (
                     <div className="text-sm muted">&nbsp;</div>
                   )}
@@ -120,7 +129,7 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
                 <span className="chip">Login required</span>
               </div>
 
-              <p className="mt-5 text-sm md:text-base muted leading-relaxed">
+              <p className="mt-5 text-sm leading-relaxed muted md:text-base">
                 {d.description ?? "—"}
               </p>
             </div>
@@ -132,19 +141,19 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
               <div className="mt-3 text-sm">
                 <div className="muted">Start</div>
                 <div className="font-semibold">{formatDateTime(d.pickup_start)}</div>
-                <div className="muted mt-3">End</div>
+                <div className="mt-3 muted">End</div>
                 <div className="font-semibold">{formatDateTime(d.pickup_end)}</div>
               </div>
 
-              <div className="mt-4 card-soft p-4">
+              <div className="card-soft mt-4 p-4">
                 <div className="text-xs muted">Expires</div>
-                <div className="text-sm font-semibold mt-1">{formatDateTime(d.expires_at)}</div>
+                <div className="mt-1 text-sm font-semibold">{formatDateTime(d.expires_at)}</div>
               </div>
             </div>
 
             <div className="card p-6">
               <div className="text-sm font-extrabold">Store info</div>
-              <div className="mt-3 text-sm space-y-2">
+              <div className="mt-3 space-y-2 text-sm">
                 <div>
                   <div className="muted">Address</div>
                   <div className="font-semibold">
@@ -170,20 +179,20 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
             <div className="mt-4 grid gap-4 text-sm">
               <div>
                 <div className="font-semibold">What will I get?</div>
-                <div className="muted mt-1">
+                <div className="mt-1 muted">
                   A surprise bundle based on today’s surplus. Exact items may vary.
                 </div>
               </div>
               <div>
                 <div className="font-semibold">Do I need an account?</div>
-                <div className="muted mt-1">
+                <div className="mt-1 muted">
                   Yes — customer login is required to reserve so your order and pickup code stay in
                   your account.
                 </div>
               </div>
               <div>
                 <div className="font-semibold">How do I redeem?</div>
-                <div className="muted mt-1">
+                <div className="mt-1 muted">
                   Show your code to the staff during the pickup window.
                 </div>
               </div>
@@ -194,7 +203,7 @@ export default async function DealDetailPage({ params, searchParams }: PageProps
         <div className="lg:col-span-2">
           <ReserveCard dealId={d.id} remaining={remaining} />
 
-          <div className="card-soft p-6 mt-4">
+          <div className="card-soft mt-4 p-6">
             <div className="text-sm font-extrabold">Good to know</div>
             <div className="mt-2 text-sm muted">
               Arrive during the pickup window. If you’re late, the store may run out.
