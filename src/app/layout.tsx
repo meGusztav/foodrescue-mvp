@@ -41,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <NavLink href="/deals">Discover</NavLink>
               <NavLink href="/#how-it-works">How It Works</NavLink>
               <NavLink href="/stores/apply">For Business</NavLink>
+              <NavLink href="/store">Store Login</NavLink>
             </nav>
 
             <div className="flex items-center gap-3">
@@ -50,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
 
         <main className="min-h-[calc(100vh-68px)]">
-          <div className="mx-auto max-w-[1180px] px-6 py-10">
+          <div className="mx-auto max-w-[1180px] px-6">
             {children}
           </div>
         </main>

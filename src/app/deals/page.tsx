@@ -1,96 +1,166 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { formatDateTime, formatMoney } from "@/lib/utils";
-import type { Deal } from "@/types";
+import { formatMoney } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-function pctOff(original: number | null, deal: number) {
-  if (!original || original <= 0) return null;
-  const pct = Math.round((1 - deal / original) * 100);
-  return Number.isFinite(pct) && pct > 0 ? pct : null;
+async function loadDealsPageData() {
+  const { data: dealsData, error: dealsError } = await supabase
+    .from("deals_with_remaining")
+    .select("*")
+    .eq("is_active", true)
+    .gt("quantity_remaining", 0)
+    .order("created_at", { ascending: false });
+
+  if (dealsError) {
+    throw new Error(dealsError.message);
+  }
+
+  const deals = dealsData ?? [];
+
+  const storeIds = [...new Set(deals.map((deal: any) => deal.store_id).filter(Boolean))];
+
+  let storeLogosById: Record<string, string | null> = {};
+
+  if (storeIds.length > 0) {
+    const { data: storesData, error: storesError } = await supabase
+      .from("stores")
+      .select("id, image_url")
+      .in("id", storeIds);
+
+    if (storesError) {
+      throw new Error(storesError.message);
+    }
+
+    storeLogosById = Object.fromEntries(
+      (storesData ?? []).map((store: any) => [store.id, store.image_url ?? null])
+    );
+  }
+
+  return { deals, storeLogosById };
+}
+
+function formatPickupTime(value?: string | null) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 export default async function DealsPage() {
-  const { data, error } = await supabase
-    .from("deals_with_remaining")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  if (error) return <div className="text-red-600 text-sm">Error: {error.message}</div>;
-
-  const deals = ((data ?? []) as Deal[]).filter((d) => d?.id);
+  const { deals, storeLogosById } = await loadDealsPageData();
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Deals near you</h1>
-          <p className="mt-1 muted">Reserve a bundle. Pick up during the window.</p>
+          <p className="mt-1 text-sm text-[#6B7A72]">
+            Reserve a bundle. Pick up during the window.
+          </p>
         </div>
 
-        {/* lightweight filter bar (UI only for now) */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <input className="input sm:w-72" placeholder="Search (e.g., pastry, sushi, Makati)" />
-          <button className="btn btn-ghost">Filters</button>
+        <div className="flex items-center gap-2">
+          <input
+            placeholder="Search (e.g., pastry, sushi, Makati)"
+            className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm outline-none"
+          />
+
+          <button className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold">
+            Filters
+          </button>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {deals.map((d) => {
-          const remaining = d.quantity_remaining ?? (d.quantity_total - d.quantity_reserved);
-          const off = pctOff(d.original_price ?? null, d.deal_price);
+      {deals.length === 0 ? (
+        <div className="rounded-xl border border-black/10 bg-white p-8 text-sm">
+          No deals available yet.
+        </div>
+      ) : (
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {deals.map((deal: any) => {
+            const pct =
+              deal.original_price && deal.original_price > 0
+                ? Math.round((1 - deal.deal_price / deal.original_price) * 100)
+                : null;
 
-          return (
-            <Link key={d.id} href={`/deals/${d.id}`} className="card p-5 hover:shadow-md transition-shadow hover:-translate-y-[2px]">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="text-sm muted truncate">{d.store_name}</div>
+            const storeLogoUrl = storeLogosById[deal.store_id] ?? null;
+
+            return (
+              <Link
+                key={deal.id}
+                href={`/deals/${deal.id}`}
+                className="overflow-hidden rounded-[18px] border border-black/6 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                <div className="relative h-[180px] w-full overflow-hidden bg-[#EDEAE1]">
+                  {deal.image_url ? (
+                    <img
+                      src={deal.image_url}
+                      alt={deal.title}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-[linear-gradient(180deg,#f4f1e8,#ebe7dc)]" />
+                  )}
+
+                  {pct ? (
+                    <div className="absolute right-3 top-3 rounded-full bg-white px-2 py-1 text-xs font-bold shadow">
+                      {pct}% off
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-[#F7F5EF]">
+                          {storeLogoUrl ? (
+                            <img
+                              src={storeLogoUrl}
+                              alt={deal.store_name}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="text-[10px] font-bold text-[#6B7A72]">
+                              {(deal.store_name ?? "S").charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="truncate text-xs text-[#6B7A72]">{deal.store_name}</div>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 text-lg font-extrabold text-[#1E6B49]">
+                      {formatMoney(deal.deal_price)}
+                    </div>
+                  </div>
+
                   <div className="mt-2 line-clamp-2 text-[16px] font-bold leading-snug text-[#12212B]">
-                    {d.title}
+                    {deal.title}
+                  </div>
+
+                  <div className="mt-2 line-clamp-2 text-sm text-[#6B7A72]">
+                    {deal.description}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between text-xs text-[#6B7A72]">
+                    <div>Remaining: {deal.quantity_remaining}</div>
+
+                    <div>{formatPickupTime(deal.pickup_start)}</div>
                   </div>
                 </div>
-
-                <div className="text-right shrink-0">
-                  <div className="text-lg font-extrabold">{formatMoney(d.deal_price)}</div>
-                  {d.original_price ? (
-                    <div className="text-xs muted line-through">{formatMoney(d.original_price)}</div>
-                  ) : (
-                    <div className="text-xs muted"> </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-3 text-sm muted line-clamp-2">{d.description ?? "—"}</div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="chip">Remaining: {Math.max(0, remaining)}</span>
-                {off ? (
-                  <span
-                    className="chip"
-                    style={{
-                      borderColor: "hsl(var(--accent) / 0.35)",
-                      background: "hsl(var(--accent) / 0.10)",
-                      color: "hsl(var(--text))",
-                    }}
-                  >
-                    <span style={{ color: "hsl(var(--accent))" }}>↓</span> {off}% off
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="mt-4 card-soft p-4">
-                <div className="text-xs muted">Pickup window</div>
-                <div className="text-sm font-semibold mt-1">
-                  {formatDateTime(d.pickup_start)} – {formatDateTime(d.pickup_end)}
-                </div>
-                <div className="text-xs muted mt-1">Expires: {formatDateTime(d.expires_at)}</div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

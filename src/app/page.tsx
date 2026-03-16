@@ -230,6 +230,22 @@ export default async function HomePage() {
               </button>
             </div>
 
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link
+                href="/deals"
+                className="rounded-[14px] bg-[#F0B233] px-5 py-3 text-[14px] font-bold text-[#1B1B1B] transition hover:brightness-95"
+              >
+                Find deals
+              </Link>
+
+              <Link
+                href="/store"
+                className="rounded-[14px] border border-white/20 bg-white/10 px-5 py-3 text-[14px] font-bold text-white backdrop-blur transition hover:bg-white/15"
+              >
+                I own a store
+              </Link>
+            </div>
+
             <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-[13px] font-semibold text-white/85 md:text-[14px]">
               <div>
                 <span className="font-extrabold text-white">2,500+</span> stores
@@ -278,12 +294,21 @@ export default async function HomePage() {
             </h3>
           </div>
 
-          <Link
-            href="/deals"
-            className="rounded-[14px] border border-black/8 bg-white px-4 py-2.5 text-[13px] font-bold text-[#12212B]"
-          >
-            View all deals
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              href="/store"
+              className="rounded-[14px] border border-black/8 bg-white px-4 py-2.5 text-[13px] font-bold text-[#12212B]"
+            >
+              For stores
+            </Link>
+
+            <Link
+              href="/deals"
+              className="rounded-[14px] border border-black/8 bg-white px-4 py-2.5 text-[13px] font-bold text-[#12212B]"
+            >
+              View all deals
+            </Link>
+          </div>
         </div>
 
         {deals.length === 0 ? (
@@ -323,6 +348,39 @@ export default async function HomePage() {
             title="Pick up & enjoy"
             description="Collect your surprise bag during the pickup window. Enjoy the deliciousness!"
           />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1240px] px-8 pb-20 md:px-10">
+        <div className="rounded-[28px] bg-[#123426] px-8 text-white md:px-12 md:py-12">
+          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <div className="text-[13px] font-bold uppercase tracking-[0.2em] text-white/60">
+                For partner stores
+              </div>
+              <h2 className="mt-3 text-[30px] font-extrabold tracking-tight md:text-[38px]">
+                Have unsold food at the end of the day?
+              </h2>
+              <p className="mt-3 max-w-[700px] text-[16px] leading-7 text-white/75">
+                Join SecondServe, publish deals, and manage pickups from your store dashboard.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/stores/apply"
+                className="rounded-[14px] border border-white/15 bg-white/10 px-5 py-3 text-[14px] font-bold text-white transition hover:bg-white/15"
+              >
+                Apply as a store
+              </Link>
+              <Link
+                href="/store"
+                className="rounded-[14px] bg-[#F0B233] px-5 py-3 text-[14px] font-bold text-[#1B1B1B] transition hover:brightness-95"
+              >
+                Open store dashboard
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
